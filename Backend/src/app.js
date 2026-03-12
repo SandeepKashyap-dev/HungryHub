@@ -6,10 +6,15 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-  origin: "https://hungry-hub-byhn.vercel.app",
-  methods: ["GET","POST","PUT","DELETE"],
+  origin: [
+    "http://localhost:5173",
+    "https://hungry-hub-byhn.vercel.app"
+  ],
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   credentials: true
 }));
+
+app.options("*", cors());   // preflight request handle
 
 const router = require("../src/routers/auth.router");
 
