@@ -18,7 +18,7 @@ function Adminpenal() {
     const handelsubmit = async (e) => {
         e.preventDefault();
         try {
-            const respons = await fetch("https://hungryhub-backend.onrender.com/api/food/addfood", {
+            const respons = await fetch("https://hungryhub-1-53st.onrender.com/api/food/addfood", {
                 method: "post",
                 headers: {
                     "Content-Type": "application/json",

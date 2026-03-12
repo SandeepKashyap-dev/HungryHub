@@ -50,7 +50,7 @@ function CheckoutPage() {
 
     try {
       // Call your backend API to create order
-      const response = await fetch("http://localhost:3000/api/orders", {
+      const response = await fetch("https://hungryhub-1-53st.onrender.com/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

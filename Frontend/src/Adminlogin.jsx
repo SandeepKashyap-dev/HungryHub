@@ -18,7 +18,7 @@ function Adminlogin() {
         }
 
         try {
-            const res = await fetch("https://hungryhub-backend.onrender.com/api/admin/adminlogin", {
+            const res = await fetch("https://hungryhub-1-53st.onrender.com/api/admin/adminlogin", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

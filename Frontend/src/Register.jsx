@@ -48,7 +48,7 @@ function Register() {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("https://hungryhub-backend.onrender.com/api/user/register", {
+      const response = await fetch("https://hungryhub-1-53st.onrender.com/api/user/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

@@ -42,7 +42,7 @@ async function registerUser(req, res) {
   } catch (error) {
     console.error("registerUser error", error);
     return res.status(500).json({
-      message: "Server error",
+      message: "Server error 1",
       error: error.message,
     });
   }
