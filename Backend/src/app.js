@@ -14,8 +14,6 @@ app.use(cors({
   credentials: true
 }));
 
-app.options("*", cors());   // preflight request handle
-
 const router = require("../src/routers/auth.router");
 
 app.use("/api", router);
