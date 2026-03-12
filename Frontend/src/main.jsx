@@ -7,7 +7,7 @@ import Section_1 from './Section_1.jsx';
 import Section_2 from './Section_2.jsx';
 import Register from './Register.jsx';
 import Login from './Login.jsx';
-import Adminpenal from './adminpenal.jsx';
+import Adminpenal from './Adminpenal.jsx';
 import Adminlogin from './Adminlogin.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import Profile from './UserDasbord.jsx';
