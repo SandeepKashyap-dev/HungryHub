@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createRoot } from 'react-dom/client'
 import './index.css';
 import Nav from './Navbar.jsx'
-import Section_1 from './section_1.jsx';
+import Section_1 from './Section_1.jsx';
 import Section_2 from './Section_2.jsx';
 import Register from './Register.jsx';
 import Login from './Login.jsx';
