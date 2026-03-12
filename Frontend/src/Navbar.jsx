@@ -14,7 +14,7 @@ function Nav() {
   useEffect(() => {
     const fetchfood = async () => {
       try {
-        const res =await fetch("http://localhost:3000/api/food/allfood");
+        const res =await fetch("https://hungryhub-backend.onrender.com/api/food/allfood");
         const data = await res.json();
         setfoods(data);
       }

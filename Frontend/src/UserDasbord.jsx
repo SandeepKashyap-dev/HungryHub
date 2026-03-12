@@ -20,7 +20,7 @@ const fetchprofile =async()=>{
 
   }
 
-  const respons = await fetch("http://localhost:3000/api/user/userprofile",{
+  const respons = await fetch("https://hungryhub-backend.onrender.com/api/user/userprofile",{
     method:"GET",
     headers:{
       "Content-Type": "application/json",
@@ -48,7 +48,7 @@ const fetchOrders = async () => {
     const token = localStorage.getItem("token");
     console.log("📦 Fetching orders with token:", token?.slice(0, 20) + "...");
     
-    const response = await fetch("http://localhost:3000/api/orders/user", {
+    const response = await fetch("https://hungryhub-backend.onrender.com/api/orders/user", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -82,7 +82,7 @@ const handleUpdate = async () => {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:3000/api/user/updateprofile",
+        "https://hungryhub-backend.onrender.com/api/user/updateprofile",
         {
           method: "PUT",
           headers: {

@@ -11,7 +11,7 @@ function Section_2() {
     const Navigate =useNavigate();
     
     useEffect(()=>{
-        fetch("http://localhost:3000/api/food/foodcard")
+        fetch("https://hungryhub-backend.onrender.com/api/food/foodcard")
         .then(res=>res.json())
         .then(data=>setfood(data));
         localStorage.removeItem("adminAuth");

@@ -22,7 +22,7 @@ function Login() {
 
     try {
 
-      const respons = await fetch("http://localhost:3000/api/user/login", {
+      const respons = await fetch("https://hungryhub-backend.onrender.com/api/user/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
