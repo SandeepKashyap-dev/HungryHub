@@ -1,10 +1,18 @@
-const express= require("express");
-const cors =require("cors");
-const app=express();
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
+
 app.use(express.json());
-const router= require("../src/routers/auth.router");
-app.use(cors());
-app.use("/api",router);
 
+app.use(cors({
+  origin: "https://hungry-hub-byhn.vercel.app",
+  methods: ["GET","POST","PUT","DELETE"],
+  credentials: true
+}));
 
-module.exports=app;
+const router = require("../src/routers/auth.router");
+
+app.use("/api", router);
+
+module.exports = app;
