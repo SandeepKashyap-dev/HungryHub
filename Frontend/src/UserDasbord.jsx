@@ -163,14 +163,14 @@ const handleUpdate = async () => {
           {/* 🔹 Logout Button */}
           <li>
             <button onClick={handleLogout} className="hover:text-yellow-200">
+              🚪 Logout
             </button>
           </li>
 
         </ul>
       </div>
 
-      {/* Main Profile Section */}
-      
+      <div className="flex-1 p-6 md:p-8">
         <h1 className="text-3xl font-bold mb-6">
           My Profile
         </h1>
