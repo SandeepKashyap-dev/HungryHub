@@ -7,7 +7,7 @@ import Section_1 from './Section_1.jsx';
 import Section_2 from './Section_2.jsx';
 import Register from './Register.jsx';
 import Login from './Login.jsx';
-import Adminpenal from './Adminpenal.jsx';
+import Adminpenal from './adminpenal.jsx';
 import Adminlogin from './Adminlogin.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import Profile from './UserDasbord.jsx';
@@ -17,6 +17,7 @@ import CheckoutPage from './CheckoutPage.jsx';
 import OrderConfirmation from './OrderConfirmation.jsx';
 import Footer from './Footer.jsx';
 import AdminLayout from './Adminlayout.jsx';
+import AdminReg from './AdminReg.jsx';
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <CardProviderd>
@@ -25,19 +26,16 @@ createRoot(document.getElementById('root')).render(
 
         <Routes>
           <Route path="/adminlogin" element={<Adminlogin />} />
+          <Route path="/adminreg" element={<AdminReg />} />
           
           <Route path='/addfood' element={
             <ProtectedRoute>
               <Adminpenal />
-              
             </ProtectedRoute>
-
           } />
-
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path='/Profile' element={<Profile />} />
-          {/* added a duplicate route so '/orders' also loads the dashboard (same component) */}
           <Route path='/orders' element={<Profile />} />
           <Route path='/cart' element={<Cart/>}/>
           <Route path='/checkout' element={<CheckoutPage/>}/>

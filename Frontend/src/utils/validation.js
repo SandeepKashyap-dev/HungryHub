@@ -1,4 +1,3 @@
-// Frontend validation utilities
 export const validateEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || "").trim());
 };

@@ -18,9 +18,7 @@ function Nav() {
         const data = await res.json();
         setfoods(data);
       }
-      catch (error) {
-        console.log("some food fetch error", error);
-      }
+      catch (error) {}
 
     };
     fetchfood();
@@ -33,7 +31,6 @@ function Nav() {
 
   const hendleSearch = (e) => {
     e.preventDefault();
-    //console.log("search are", search);
     searchupdate("");
   };
 
@@ -49,11 +46,10 @@ function Nav() {
             </span>
           </div>
           <div className="hidden md:flex items-center ">
-            <span className="font-bold"> Deliverd to:</span>
+            <span className="font-bold">Deliverd to:</span>
             <FaLocationDot className="text-orange-500 m-2 " />
             <span className="md:text-base text-gray-600 p-1">Current Location</span>
-            <span className="font-bold  md:inline ">Thanesar Old Bus Stand, Kurukshetra</span>
-
+            <span className="font-bold md:inline">Thanesar Old Bus Stand, Kurukshetra</span>
           </div>
 
           <form className="relative flex " onSubmit={hendleSearch}>

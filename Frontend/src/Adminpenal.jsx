@@ -41,7 +41,6 @@ function Adminpenal() {
 
         }
         catch(error){
-            console.log("Some error", error);
         }
     
 

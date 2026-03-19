@@ -39,12 +39,9 @@ function Register() {
     } 
     return true;
   }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    // run frontend validation and stop if invalid
     if (!validateForm()) return;
 
     try {
@@ -55,15 +52,12 @@ function Register() {
         },
         body: JSON.stringify(formData)
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         setError(data.message || "Registration failed");
         return;
       }
       localStorage.setItem("token", data.token);
-
       navigate("/login");
 
     } catch (err) {

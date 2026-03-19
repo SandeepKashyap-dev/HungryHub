@@ -7,9 +7,6 @@ function CheckoutPage() {
   const { cart, clearCart } = useContext(CreateContext);
   const token = localStorage.getItem("token");
 
-  console.log("🔍 CheckoutPage Debug:", { cartLength: cart.length, token: !!token, cart });
-
-  // Redirect to login if not authenticated
   React.useEffect(() => {
     if (!token) {
       alert("Please login first");
@@ -45,11 +42,7 @@ function CheckoutPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
-    console.log("🛒 Submitting order:", { items: cart.length, deliveryInfo: formData, total });
-
     try {
-      // Call your backend API to create order
       const response = await fetch("https://hungryhub-1-53st.onrender.com/api/orders", {
         method: "POST",
         headers: {
@@ -65,17 +58,14 @@ function CheckoutPage() {
       });
 
       const responseData = await response.json();
-      console.log("📦 Order Response:", response.status, responseData);
-
       if (response.ok) {
         alert("Order placed successfully!");
-        clearCart(); // Clear cart after successful order
+        clearCart();
         navigate("/order-confirmation");
       } else {
         alert(`Failed to place order: ${responseData.message}`);
       }
     } catch (error) {
-      console.error("Error placing order:", error);
       alert("An error occurred: " + error.message);
     } finally {
       setIsLoading(false);

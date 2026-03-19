@@ -42,7 +42,7 @@ async function registerUser(req, res) {
   } catch (error) {
     console.error("registerUser error", error);
     return res.status(500).json({
-      message: "Server error 1",
+      message: "Server error",
       error: error.message,
     });
   }
@@ -50,6 +50,7 @@ async function registerUser(req, res) {
 
 async function userlogin(req, res) {
   try {
+    
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
@@ -96,6 +97,35 @@ async function userprofile(req, res) {
     console.error("userprofile error", error);
     return res.status(500).json({
       message: "server error",
+      error: error.message,
+    });
+  }
+}
+
+async function updateprofile(req, res) {
+  try {
+    const userid = req.user.id;
+    const { fullname, email } = req.body;
+
+    if (!fullname || !email) {
+      return res.status(400).json({ message: "Fullname and email are required" });
+    }
+
+    const user = await usermodel.findByIdAndUpdate(
+      userid,
+      { fullname, email },
+      { new: true }
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "Profile updated successfully", user });
+  } catch (error) {
+    console.error("updateprofile error", error);
+    return res.status(500).json({
+      message: "Server error",
       error: error.message,
     });
   }
@@ -170,26 +200,59 @@ async function adminlogin(req, res) {
   }
 }
 
+
 async function adminreg(req, res) {
   try {
+
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+      return res.status(400).json({
+        message: "Email and password required"
+      });
     }
-    const admin = await adminmodule.create({ email, password });
+
+    // check existing admin
+    const existing = await adminmodule.findOne({ email });
+
+    if (existing) {
+      return res.status(409).json({
+        message: "Admin already exists"
+      });
+    }
+    const hashedPassword = await bcryptjs.hash(password, 10);
+    const admin = await adminmodule.create({
+      email,
+      password: hashedPassword
+    });
+    const token = jwt.sign(
+      { id: admin._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.cookie("token", token);
+
     return res.status(201).json({
       message: "Admin registered successfully",
-      adminId: admin._id,
+      token,
+      admin: {
+        _id: admin._id,
+        email: admin.email
+      }
     });
-  } catch (error) {
+
+  } 
+  catch (error) {
+
     console.error("adminreg error", error);
+
     return res.status(500).json({
-      message: "some error occurred",
-      error: error.message,
+      message: "Server error",
+      error: error.message
     });
+
   }
 }
-
 async function createOrder(req, res) {
   try {
     const userId = req.user.id;
@@ -244,10 +307,49 @@ async function getUserOrders(req, res) {
   }
 }
 
+async function cancelOrder(req, res) {
+  try {
+    const userId = req.user.id;
+    const orderId = req.params.id;
+
+    const order = await ordermodule.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.userId.toString() !== userId) {
+      return res.status(403).json({ message: "Not authorized to cancel this order" });
+    }
+
+    if (order.status === "cancelled") {
+      return res.status(400).json({ message: "Order is already cancelled" });
+    }
+
+    if (order.status === "delivered") {
+      return res.status(400).json({ message: "Delivered orders cannot be cancelled" });
+    }
+
+    order.status = "cancelled";
+    await order.save();
+
+    return res.status(200).json({
+      message: "Order cancelled successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("cancelOrder error", error);
+    return res.status(500).json({
+      message: "Error cancelling order",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   registerUser,
   userlogin,
   userprofile,
+  updateprofile,
   foodcard,
   addfood,
   allfood,
@@ -255,5 +357,6 @@ module.exports = {
   adminreg,
   createOrder,
   getUserOrders,
+  cancelOrder,
 };
 
