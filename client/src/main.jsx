@@ -44,12 +44,11 @@ createRoot(document.getElementById('root')).render(
 
             <Section_1 />
             <Section_2 />
+            <Footer />
 
           </>} />
 
         </Routes>
-
-        <Footer/>
 
 
 
