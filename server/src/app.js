@@ -23,4 +23,20 @@ app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });
 });
 
+app.get("/db-health", async (req, res) => {
+  try {
+    const mongoose = require("mongoose");
+    const state = mongoose.connection.readyState;
+    const states = {
+      0: "disconnected",
+      1: "connected",
+      2: "connecting",
+      3: "disconnecting"
+    };
+    res.json({ dbStatus: states[state], message: "DB check" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = app;
