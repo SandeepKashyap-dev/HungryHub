@@ -8,7 +8,8 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://hungry-hub-byhn.vercel.app"
+    "https://hungry-hub-byhn.vercel.app",
+    "https://hungry-hub-gxn9.vercel.app"
   ],
   methods: ["GET","POST","PUT","DELETE","OPTIONS"],
   credentials: true
