@@ -1,5 +1,6 @@
 import React, { useContext } from "react";
 import { useEffect,useState,createContext } from "react";
+import { API_ENDPOINTS } from "./config/api";
 
 import { CreateContext } from "./CartContext";
 import { useNavigate } from "react-router-dom";
@@ -11,7 +12,7 @@ function Section_2() {
     const Navigate =useNavigate();
     
     useEffect(()=>{
-        fetch("https://hungryhub-1-53st.onrender.com/api/food/foodcard")
+        fetch(API_ENDPOINTS.GET_FOOD_CARD)
         .then(res=>res.json())
         .then(data=>setfood(data));
         localStorage.removeItem("adminAuth");

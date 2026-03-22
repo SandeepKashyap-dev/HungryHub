@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { API_ENDPOINTS } from "./config/api";
 
 function Login() {
 
@@ -22,7 +23,7 @@ function Login() {
 
     try {
 
-      const respons = await fetch("https://hungryhub-1-53st.onrender.com/api/user/login", {
+      const respons = await fetch(API_ENDPOINTS.USER_LOGIN, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

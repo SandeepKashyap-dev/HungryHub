@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { API_ENDPOINTS } from "./config/api";
 
 function Adminpenal() {
 
@@ -18,7 +19,7 @@ function Adminpenal() {
     const handelsubmit = async (e) => {
         e.preventDefault();
         try {
-            const respons = await fetch("https://hungryhub-1-53st.onrender.com/api/food/addfood", {
+            const respons = await fetch(API_ENDPOINTS.ADD_FOOD, {
                 method: "post",
                 headers: {
                     "Content-Type": "application/json",

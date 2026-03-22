@@ -4,6 +4,7 @@ import { IoSearchSharp } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { Link } from "react-router-dom";
+import { API_ENDPOINTS } from "./config/api";
 
 function Nav() {
   const [foods, setfoods] = useState([]);
@@ -14,7 +15,7 @@ function Nav() {
   useEffect(() => {
     const fetchfood = async () => {
       try {
-        const res =await fetch("https://hungryhub-1-53st.onrender.com/api/food/allfood");
+        const res =await fetch(API_ENDPOINTS.GET_ALL_FOOD);
         const data = await res.json();
         setfoods(data);
       }

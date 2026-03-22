@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "./config/api";
 
 function AdminRegister() {
 
@@ -18,7 +19,7 @@ function AdminRegister() {
 
         try {
 
-            const res = await fetch("http://localhost:3000/api/admin/adminreg", {
+            const res = await fetch(API_ENDPOINTS.ADMIN_REGISTER, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

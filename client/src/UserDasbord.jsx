@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
 import {Link,useNavigate} from "react-router-dom";
+import { API_ENDPOINTS } from "./config/api";
 
 function UserDasbord(){
 
@@ -23,7 +24,7 @@ const fetchprofile =async()=>{
 
   }
 
-  const respons = await fetch("https://hungryhub-1-53st.onrender.com/api/user/userprofile",{
+  const respons = await fetch(API_ENDPOINTS.USER_PROFILE,{
     method:"GET",
     headers:{
       "Content-Type": "application/json",
@@ -48,7 +49,7 @@ const fetchOrders = async () => {
   try {
     const token = localStorage.getItem("token");
     
-    const response = await fetch("http://localhost:3000/api/orders/user", {
+    const response = await fetch(API_ENDPOINTS.GET_USER_ORDERS, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -70,7 +71,7 @@ const fetchOrders = async () => {
 const handleCancelOrder = async (orderId) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await fetch(`http://localhost:3000/api/orders/${orderId}/cancel`, {
+    const response = await fetch(API_ENDPOINTS.CANCEL_ORDER(orderId), {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -105,7 +106,7 @@ const handleUpdate = async () => {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        "https://hungryhub-1-53st.onrender.com/api/user/updateprofile",
+        API_ENDPOINTS.USER_UPDATE_PROFILE,
         {
           method: "PUT",
           headers: {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { API_ENDPOINTS } from "./config/api";
 import{validateEmail,validatePassword,validateFullName,validatePhoneNumber,validateAddress,getPasswordStrength} from "./utils/validation";
 function Register() {
 
@@ -45,7 +46,7 @@ function Register() {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch("https://hungryhub-1-53st.onrender.com/api/user/register", {
+      const response = await fetch(API_ENDPOINTS.USER_REGISTER, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

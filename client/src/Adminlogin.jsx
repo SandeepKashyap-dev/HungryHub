@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import { API_ENDPOINTS } from "./config/api";
 
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +19,7 @@ function Adminlogin() {
         }
 
         try {
-            const res = await fetch("http://localhost:3000/api/admin/adminlogin", {
+            const res = await fetch(API_ENDPOINTS.ADMIN_LOGIN, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
