@@ -15,15 +15,23 @@ function Nav() {
   useEffect(() => {
     const fetchfood = async () => {
       try {
-        const res =await fetch(API_ENDPOINTS.GET_ALL_FOOD);
+        const res = await fetch(API_ENDPOINTS.GET_ALL_FOOD);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
         const data = await res.json();
-        setfoods(data);
+        if (Array.isArray(data)) {
+          setfoods(data);
+        } else {
+          console.error("API did not return an array:", data);
+          setfoods([]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch foods:", error);
+        setfoods([]);
       }
-      catch (error) {}
-
     };
     fetchfood();
-
   }, []);
 
 
