@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const Verifytoken=require("../middlewares/Verifytoken");
-const {registerUser,userlogin,userprofile,updateprofile,foodcard,addfood,allfood,adminlogin,adminreg,createOrder,getUserOrders,cancelOrder}=require("../controllers/auth.controller");
+const {registerUser,userlogin,userprofile,updateprofile,foodcard,addfood,allfood,adminlogin,adminreg,createOrder,getUserOrders,cancelOrder,unifiedLogin}=require("../controllers/auth.controller");
 
 
 router.post("/user/register",registerUser);
 router.post("/user/login",userlogin);
+router.post("/login",unifiedLogin);
 router.get("/user/userprofile",Verifytoken,userprofile);
 router.put("/user/updateprofile",Verifytoken,updateprofile);
 router.post("/food/addfood",addfood);

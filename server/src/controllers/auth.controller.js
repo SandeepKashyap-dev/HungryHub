@@ -47,26 +47,41 @@ async function registerUser(req, res) {
     });
   }
 }
-
 async function userlogin(req, res) {
   try {
-    
+
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
     }
 
     const user = await usermodel.findOne({ email });
+
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
+
     const match = await bcryptjs.compare(password, user.password);
+
     if (!match) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.cookie("token", token);
+    // ====== UPDATED CODE (important) ======
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }   // user 7 din tak login rahega
+    );
+
+    // ====== UPDATED COOKIE ======
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,   // 7 days
+      sameSite: "lax"
+    });
+
     return res.status(200).json({
       message: "Login successfully",
       token,
@@ -76,8 +91,10 @@ async function userlogin(req, res) {
         email: user.email,
       },
     });
+
   } catch (error) {
     console.error("userlogin error", error);
+
     return res.status(500).json({
       message: "Server error",
       error: error.message,
@@ -345,6 +362,110 @@ async function cancelOrder(req, res) {
   }
 }
 
+// Unified Login for both User and Admin
+async function unifiedLogin(req, res) {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+
+    // Check if it's an admin
+    let admin = await adminmodule.findOne({ email });
+    if (admin) {
+      try {
+        const match = await bcryptjs.compare(password, admin.password);
+        if (!match) {
+          return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        if (!process.env.JWT_SECRET) {
+          console.error("JWT_SECRET not found in environment");
+          return res.status(500).json({ message: "Server configuration error" });
+        }
+
+        const token = jwt.sign(
+          { id: admin._id },
+          process.env.JWT_SECRET,
+          { expiresIn: "7d" }
+        );
+
+        res.cookie("adminAuth", token, {
+          httpOnly: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          sameSite: "lax"
+        });
+
+        return res.status(200).json({
+          message: "Admin login successful",
+          token,
+          role: "admin",
+          admin: {
+            _id: admin._id,
+            email: admin.email,
+          },
+        });
+      } catch (hashError) {
+        console.error("Password comparison error for admin:", hashError);
+        return res.status(500).json({ message: "Authentication error" });
+      }
+    }
+
+    // Check if it's a user
+    let user = await usermodel.findOne({ email });
+    if (user) {
+      try {
+        const match = await bcryptjs.compare(password, user.password);
+        if (!match) {
+          return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        if (!process.env.JWT_SECRET) {
+          console.error("JWT_SECRET not found in environment");
+          return res.status(500).json({ message: "Server configuration error" });
+        }
+
+        const token = jwt.sign(
+          { id: user._id },
+          process.env.JWT_SECRET,
+          { expiresIn: "7d" }
+        );
+
+        res.cookie("token", token, {
+          httpOnly: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          sameSite: "lax"
+        });
+
+        return res.status(200).json({
+          message: "User login successful",
+          token,
+          role: "user",
+          user: {
+            _id: user._id,
+            fullname: user.fullname,
+            email: user.email,
+          },
+        });
+      } catch (hashError) {
+        console.error("Password comparison error for user:", hashError);
+        return res.status(500).json({ message: "Authentication error" });
+      }
+    }
+
+    // Neither admin nor user found
+    return res.status(400).json({ message: "Invalid email or password" });
+
+  } catch (error) {
+    console.error("unifiedLogin error", error);
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   registerUser,
   userlogin,
@@ -358,5 +479,6 @@ module.exports = {
   createOrder,
   getUserOrders,
   cancelOrder,
+  unifiedLogin,
 };
 

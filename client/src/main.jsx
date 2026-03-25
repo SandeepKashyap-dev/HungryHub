@@ -25,7 +25,7 @@ createRoot(document.getElementById('root')).render(
         <Nav />
 
         <Routes>
-          <Route path="/adminlogin" element={<Adminlogin />} />
+          <Route path="/adminlogin" element={<Login />} />
           <Route path="/adminreg" element={<AdminReg />} />
           
           <Route path='/addfood' element={

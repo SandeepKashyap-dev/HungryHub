@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { CreateContext } from "./CartContext";
 import { useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "./config/api";
@@ -7,13 +7,18 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, clearCart } = useContext(CreateContext);
   const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  React.useEffect(() => {
-    if (!token) {
+  useEffect(() => {
+    // Check if user is authenticated
+    if (token && user) {
+      setIsAuthenticated(true);
+    } else {
       alert("Please login first");
       navigate("/login", { state: { redirectTo: "/checkout" } });
     }
-  }, [token, navigate]);
+  }, []);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -72,6 +77,11 @@ function CheckoutPage() {
       setIsLoading(false);
     }
   };
+
+  // Don't render if not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (cart.length === 0) {
     return (

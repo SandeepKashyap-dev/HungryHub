@@ -4,7 +4,7 @@ import { Navigate } from "react-router-dom";
 function ProtectedRoute ({children}){
     const isAdmin = localStorage.getItem("adminAuth");
     if(!isAdmin){
-        return <Navigate to="/adminlogin"/>;
+        return <Navigate to="/login"/>;
     }
     return children ;
 }

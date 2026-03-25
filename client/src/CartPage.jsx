@@ -74,7 +74,10 @@ function Cart() {
           <button
             onClick={() => {
               const token = localStorage.getItem("token");
-              if (!token) {
+              const user = localStorage.getItem("user");
+              
+              // Only redirect to login if BOTH token AND user are missing
+              if (!token || !user) {
                 alert("Please login first");
                 Navigate("/login", { state: { redirectTo: "/checkout" } });
               } else {

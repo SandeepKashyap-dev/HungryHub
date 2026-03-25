@@ -12,14 +12,17 @@ const Navigate =useNavigate();
 const [editMode, setEditMode] = useState(false);
 const [fullname, setFullname] = useState("");
 const [email, setEmail] = useState("");
+const [isLoading, setIsLoading] = useState(false);
 
 
 const fetchprofile =async()=>{
   try{
 
   const token = localStorage.getItem("token");
-  if(!token){
-    Navigate("/login");
+const storedUser = localStorage.getItem("user");
+
+if(!token || !storedUser){
+  Navigate("/login");
     return ;
 
   }
@@ -35,11 +38,14 @@ const fetchprofile =async()=>{
   const data =await respons.json();
   if(respons.ok){
     setuser(data.user);
+    setIsLoading(false);
   }else{
     alert(data.message);
+    setIsLoading(false);
   }
   }
   catch(error){
+    setIsLoading(false);
   };
 
 
@@ -98,6 +104,11 @@ const handleCancelOrder = async (orderId) => {
 
 const handleLogout = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  
+  // Dispatch custom event to notify other components about logout
+  window.dispatchEvent(new Event("userLogout"));
+  
   Navigate("/login");
 };
 
@@ -122,6 +133,7 @@ const handleUpdate = async () => {
       if (res.ok) {
         alert("Profile Updated Successfully");
         setuser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
         setEditMode(false);
       } else {
         alert(data.message);

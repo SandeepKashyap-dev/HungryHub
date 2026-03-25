@@ -3,12 +3,16 @@ import { useState, useEffect } from "react";
 import { IoSearchSharp } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "./config/api";
 
 function Nav() {
   const [foods, setfoods] = useState([]);
   const [search, searchupdate] = useState("");
+  const [user, setUser] = useState(null);
+  const [showProfileSidebar, setShowProfileSidebar] = useState(false);
+  const [orders, setOrders] = useState([]);
+  const navigate = useNavigate();
 
 
 
@@ -33,6 +37,117 @@ function Nav() {
     };
     fetchfood();
   }, []);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedAdmin = localStorage.getItem("adminData");
+    
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        localStorage.removeItem("user");
+      }
+    } else if (storedAdmin) {
+      try {
+        const adminData = JSON.parse(storedAdmin);
+        setUser({ email: adminData.email, fullname: "Admin" });
+      } catch (error) {
+        localStorage.removeItem("adminData");
+      }
+    } else {
+      setUser(null);
+    }
+
+    // Listen for storage changes (login/logout from other tabs or same tab)
+    const handleStorageChange = (e) => {
+      if (e.key === "user") {
+        if (e.newValue) {
+          try {
+            setUser(JSON.parse(e.newValue));
+            setShowProfileSidebar(false);
+          } catch (error) {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+          setShowProfileSidebar(false);
+        }
+      }
+    };
+
+    // Listen for custom login event (same tab login)
+    const handleUserLogin = () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+          setShowProfileSidebar(false);
+        } catch (error) {
+          setUser(null);
+        }
+      }
+    };
+
+    // Listen for custom logout event
+    const handleUserLogout = () => {
+      setUser(null);
+      setShowProfileSidebar(false);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("userLogin", handleUserLogin);
+    window.addEventListener("userLogout", handleUserLogout);
+    
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("userLogin", handleUserLogin);
+      window.removeEventListener("userLogout", handleUserLogout);
+    };
+  }, []);
+
+  // Fetch user orders
+  useEffect(() => {
+    if (user) {
+      fetchUserOrders();
+    }
+  }, [user]);
+
+  const fetchUserOrders = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await fetch(API_ENDPOINTS.GET_USER_ORDERS, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setOrders(Array.isArray(data.orders) ? data.orders : []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch orders:", error);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("adminAuth");
+    localStorage.removeItem("adminData");
+    setUser(null);
+    setShowProfileSidebar(false);
+    
+    // Dispatch custom event to notify other components about logout
+    window.dispatchEvent(new Event("userLogout"));
+    
+    navigate("/login");
+  };
 
 
   const filterfoods = foods.filter((food) =>
@@ -85,14 +200,123 @@ function Nav() {
             </div>
           </form>
           <Link
-              to="/register"
-              className="flex items-center gap-2 text-orange-500 px-2 py-2 ml-4 rounded font-bold"
+              to={user ? "#" : "/register"}
+              onClick={(e) => {
+                if (user) {
+                  e.preventDefault();
+                  setShowProfileSidebar(!showProfileSidebar);
+                }
+              }}
+              className="flex items-center gap-2 text-orange-500 px-2 py-2 ml-4 rounded font-bold cursor-pointer hover:text-orange-600"
             >
               <FaUser />
-             Reg_User
+              {user ? user.fullname : "Reg_User"}
             </Link>
         </div>
       </nav>
+
+      {/* Profile Sidebar */}
+      {user && (
+        <>
+          {/* Overlay */}
+          {showProfileSidebar && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+              onClick={() => setShowProfileSidebar(false)}
+            />
+          )}
+
+          {/* Sidebar */}
+          <div
+            className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50 ${
+              showProfileSidebar ? "translate-x-0" : "translate-x-full"
+            } overflow-y-auto`}
+          >
+            {/* Sidebar Header */}
+            <div className="bg-orange-500 text-white p-6">
+              <button
+                onClick={() => setShowProfileSidebar(false)}
+                className="text-2xl font-bold mb-4 float-right"
+              >
+                ✕
+              </button>
+              <h2 className="text-2xl font-bold clear-both">Profile</h2>
+            </div>
+
+            {/* User Details */}
+            <div className="p-6 space-y-4">
+              <div className="bg-gray-100 p-4 rounded-lg text-center">
+                <div className="w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-3">
+                  <FaUser />
+                </div>
+                <p className="text-xl font-bold text-gray-800">{user.fullname}</p>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-sm text-gray-600 font-semibold">Email</p>
+                <p className="text-gray-800 break-all">{user.email}</p>
+              </div>
+
+              <div className="border-t pt-4">
+                <p className="text-sm text-gray-600 font-semibold mb-2">Recent Orders</p>
+                {orders.length > 0 ? (
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {orders.slice(0, 5).map((order) => (
+                      <div
+                        key={order._id}
+                        className="bg-gray-100 p-2 rounded text-sm"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="font-semibold text-orange-600">
+                            #{order._id?.slice(-6)}
+                          </span>
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${
+                            order.status === "completed"
+                              ? "bg-green-200 text-green-800"
+                              : order.status === "cancelled"
+                              ? "bg-red-200 text-red-800"
+                              : "bg-blue-200 text-blue-800"
+                          }`}>
+                            {order.status}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-xs mt-1">
+                          Rs. {order.totalPrice}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm">No orders yet</p>
+                )}
+              </div>
+
+              <div className="border-t pt-4 space-y-2">
+                <Link
+                  to="/Profile"
+                  onClick={() => setShowProfileSidebar(false)}
+                  className="block w-full text-center bg-orange-500 text-white py-2 rounded font-semibold hover:bg-orange-600 transition"
+                >
+                  View Full Profile
+                </Link>
+                <Link
+                  to="/orders"
+                  onClick={() => setShowProfileSidebar(false)}
+                  className="block w-full text-center bg-blue-500 text-white py-2 rounded font-semibold hover:bg-blue-600 transition"
+                >
+                  All Orders
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full bg-red-500 text-white py-2 rounded font-semibold hover:bg-red-600 transition"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

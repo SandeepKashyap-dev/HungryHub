@@ -15,10 +15,23 @@ function Section_2() {
         fetch(API_ENDPOINTS.GET_FOOD_CARD)
         .then(res=>res.json())
         .then(data=>setfood(data));
-        localStorage.removeItem("adminAuth");
-        localStorage.removeItem("token");
-
     },[])
+
+    const handleOrderNow = (foodItem) => {
+        const token = localStorage.getItem("token");
+        const user = localStorage.getItem("user");
+
+        // Check if user is logged in
+        if (!token || !user) {
+            alert("Please login to place an order");
+            Navigate("/login", { state: { redirectTo: "/cart" } });
+            return;
+        }
+
+        // User is logged in, add to cart and go to cart
+        addtocart(foodItem);
+        Navigate("/cart");
+    };
 
     return (
         <>
@@ -49,7 +62,7 @@ function Section_2() {
                                 <p >
                                    ₹ {food.price}
                                 </p>
-                                <button onClick={()=>{addtocart(food); Navigate("/cart");}} className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl font-medium transition">
+                                <button onClick={() => handleOrderNow(food)} className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl font-medium transition">
                                     Order Now
                                 </button>
                             </div>
