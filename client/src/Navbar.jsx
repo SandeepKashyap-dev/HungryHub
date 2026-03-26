@@ -151,6 +151,14 @@ function Nav() {
     return nameMatch || categoryMatch;
   });
 
+  // Get unique food items by name
+  const uniqueFoods = filterfoods.reduce((acc, food) => {
+    if (!acc.some(item => item.name === food.name)) {
+      acc.push(food);
+    }
+    return acc;
+  }, []);
+
   const hendleSearch = (e) => {
     e.preventDefault();
     // Keep the search value so filtered results remain visible.
@@ -194,7 +202,7 @@ function Nav() {
 
 
               />
-              {search && (<div className="absolute left-0 right-0 top-full mt-2 bg-white text-center rounded z-50 "> {filterfoods.length > 0 ? (filterfoods.map((food) => (<p key={food._id} className="p-2 cursor-pointer hover:bg-gray-100" onClick={() => {const element=document.getElementById(food._id);if(element){element.scrollIntoView({behavior:"smooth"});}searchupdate("");}} > {food.name} </p>))) : (<p className="p-2 text-gray-500 inline-block">No food found</p>)} </div>)}
+              {search && (<div className="absolute left-0 right-0 top-full mt-2 bg-white text-center rounded z-50 "> {uniqueFoods.length > 0 ? (uniqueFoods.map((food) => (<p key={food._id} className="p-2 cursor-pointer hover:bg-gray-100" onClick={() => {const element=document.getElementById(food._id);if(element){element.scrollIntoView({behavior:"smooth"});}searchupdate("");}} > {food.name} </p>))) : (<p className="p-2 text-gray-500 inline-block">No food found</p>)} </div>)}
 
             </div>
           </form>
