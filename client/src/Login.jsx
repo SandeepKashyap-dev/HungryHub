@@ -70,8 +70,7 @@ function Login() {
           localStorage.setItem("user", JSON.stringify(result.user));
           alert("User login successful");
           window.dispatchEvent(new Event("userLogin"));
-          const redirectTo = location.state?.redirectTo || "/Profile";
-          navigate(redirectTo);
+          navigate("/");
         } else {
           alert("Unknown role received from server");
           console.error("❌ Unknown role:", result.role);
