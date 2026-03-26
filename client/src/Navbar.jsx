@@ -207,9 +207,9 @@ function Nav() {
             </div>
           </form>
           <Link
-              to={user ? "#" : "/register"}
+              to={user && user.fullname !== "Admin" ? "#" : "/register"}
               onClick={(e) => {
-                if (user) {
+                if (user && user.fullname !== "Admin") {
                   e.preventDefault();
                   setShowProfileSidebar(!showProfileSidebar);
                 }
@@ -217,13 +217,13 @@ function Nav() {
               className="flex items-center gap-2 text-orange-500 px-2 py-2 ml-4 rounded font-bold cursor-pointer hover:text-orange-600"
             >
               <FaUser />
-              {user ? user.fullname : "Reg_User"}
+              {user && user.fullname !== "Admin" ? user.fullname : "Reg_User"}
             </Link>
         </div>
       </nav>
 
       {}
-      {user && (
+      {user && user.fullname !== "Admin" && (
         <>
           {}
           {showProfileSidebar && (
