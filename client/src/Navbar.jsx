@@ -145,12 +145,16 @@ function Nav() {
   };
 
 
-  const filterfoods = foods.filter((food) =>
-    food.name.toLowerCase().includes(search.toLowerCase()));
+  const filterfoods = foods.filter((food) => {
+    const nameMatch = (food.name || "").toLowerCase().includes(search.toLowerCase());
+    const categoryMatch = (food.category || "").toLowerCase().includes(search.toLowerCase());
+    return nameMatch || categoryMatch;
+  });
 
   const hendleSearch = (e) => {
     e.preventDefault();
-    searchupdate("");
+    // Keep the search value so filtered results remain visible.
+    // Optionally you can use this place to direct to a search result page.
   };
 
   return (

@@ -15,7 +15,12 @@ export const API_ENDPOINTS = {
 
   ADD_FOOD: `${API_URL}/api/food/addfood`,
   GET_ALL_FOOD: `${API_URL}/api/food/allfood`,
+  UPDATE_FOOD: (id) => `${API_URL}/api/food/${id}`,
+  DELETE_FOOD: (id) => `${API_URL}/api/food/${id}`,
   GET_FOOD_CARD: `${API_URL}/api/food/foodcard`,
+
+  GET_ALL_USERS: `${API_URL}/api/admin/users`,
+  DELETE_USER: (id) => `${API_URL}/api/admin/users/${id}`,
 
   CREATE_ORDER: `${API_URL}/api/orders`,
   GET_USER_ORDERS: `${API_URL}/api/orders/user`,

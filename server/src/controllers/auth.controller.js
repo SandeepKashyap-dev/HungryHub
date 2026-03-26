@@ -66,12 +66,14 @@ async function userlogin(req, res) {
 
     if (!match) {
       return res.status(400).json({ message: "Invalid email or password" });
-    }
+    }
+
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }   // user 7 din tak login rahega
-    );
+    );
+
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,   // 7 days
@@ -186,6 +188,58 @@ async function allfood(req, res) {
   }
 }
 
+async function updatefood(req, res) {
+  try {
+    const foodId = req.params.id;
+    const updated = await foodmodule.findByIdAndUpdate(foodId, req.body, { new: true });
+    if (!updated) {
+      return res.status(404).json({ message: "Food item not found" });
+    }
+    return res.status(200).json({ message: "Food updated successfully", food: updated });
+  } catch (error) {
+    console.error("updatefood error", error);
+    return res.status(500).json({ message: "some error occurred", error: error.message });
+  }
+}
+
+async function deletefood(req, res) {
+  try {
+    const foodId = req.params.id;
+    const deleted = await foodmodule.findByIdAndDelete(foodId);
+    if (!deleted) {
+      return res.status(404).json({ message: "Food item not found" });
+    }
+    return res.status(200).json({ message: "Food deleted successfully" });
+  } catch (error) {
+    console.error("deletefood error", error);
+    return res.status(500).json({ message: "some error occurred", error: error.message });
+  }
+}
+
+async function getAllUsers(req, res) {
+  try {
+    const allUsers = await usermodel.find().select("-password");
+    return res.status(200).json(allUsers);
+  } catch (error) {
+    console.error("getAllUsers error", error);
+    return res.status(500).json({ message: "some error occurred", error: error.message });
+  }
+}
+
+async function deleteUser(req, res) {
+  try {
+    const userId = req.params.id;
+    const deleted = await usermodel.findByIdAndDelete(userId);
+    if (!deleted) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("deleteUser error", error);
+    return res.status(500).json({ message: "some error occurred", error: error.message });
+  }
+}
+
 async function adminlogin(req, res) {
   try {
     const { email, password } = req.body;
@@ -222,7 +276,8 @@ async function adminreg(req, res) {
       return res.status(400).json({
         message: "Email and password required"
       });
-    }
+    }
+
     const existing = await adminmodule.findOne({ email });
 
     if (existing) {
@@ -354,14 +409,16 @@ async function cancelOrder(req, res) {
       error: error.message,
     });
   }
-}
+}
+
 async function unifiedLogin(req, res) {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
-    }
+    }
+
     let admin = await adminmodule.findOne({ email });
     if (admin) {
       try {
@@ -400,7 +457,8 @@ async function unifiedLogin(req, res) {
         console.error("Password comparison error for admin:", hashError);
         return res.status(500).json({ message: "Authentication error" });
       }
-    }
+    }
+
     let user = await usermodel.findOne({ email });
     if (user) {
       try {
@@ -440,7 +498,8 @@ async function unifiedLogin(req, res) {
         console.error("Password comparison error for user:", hashError);
         return res.status(500).json({ message: "Authentication error" });
       }
-    }
+    }
+
     return res.status(400).json({ message: "Invalid email or password" });
 
   } catch (error) {
@@ -466,5 +525,9 @@ module.exports = {
   getUserOrders,
   cancelOrder,
   unifiedLogin,
+  updatefood,
+  deletefood,
+  getAllUsers,
+  deleteUser,
 };
 
