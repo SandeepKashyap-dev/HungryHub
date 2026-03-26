@@ -66,16 +66,12 @@ async function userlogin(req, res) {
 
     if (!match) {
       return res.status(400).json({ message: "Invalid email or password" });
-    }
-
-    // ====== UPDATED CODE (important) ======
+    }
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }   // user 7 din tak login rahega
-    );
-
-    // ====== UPDATED COOKIE ======
+    );
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,   // 7 days
@@ -226,9 +222,7 @@ async function adminreg(req, res) {
       return res.status(400).json({
         message: "Email and password required"
       });
-    }
-
-    // check existing admin
+    }
     const existing = await adminmodule.findOne({ email });
 
     if (existing) {
@@ -360,18 +354,14 @@ async function cancelOrder(req, res) {
       error: error.message,
     });
   }
-}
-
-// Unified Login for both User and Admin
+}
 async function unifiedLogin(req, res) {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
-    }
-
-    // Check if it's an admin
+    }
     let admin = await adminmodule.findOne({ email });
     if (admin) {
       try {
@@ -410,9 +400,7 @@ async function unifiedLogin(req, res) {
         console.error("Password comparison error for admin:", hashError);
         return res.status(500).json({ message: "Authentication error" });
       }
-    }
-
-    // Check if it's a user
+    }
     let user = await usermodel.findOne({ email });
     if (user) {
       try {
@@ -452,9 +440,7 @@ async function unifiedLogin(req, res) {
         console.error("Password comparison error for user:", hashError);
         return res.status(500).json({ message: "Authentication error" });
       }
-    }
-
-    // Neither admin nor user found
+    }
     return res.status(400).json({ message: "Invalid email or password" });
 
   } catch (error) {

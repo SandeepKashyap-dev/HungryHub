@@ -1,9 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 
-const app = express();
-
-// Middleware - Order matters!
+const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -50,18 +48,14 @@ app.get("/db-health", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-});
-
-// 404 handler - must be before error handler
+});
 app.use((req, res) => {
   res.status(404).json({ 
     message: "Route not found", 
     path: req.path,
     method: req.method 
   });
-});
-
-// Global error handler
+});
 app.use((err, req, res, next) => {
   console.error("Error:", err);
   res.status(err.status || 500).json({ 
