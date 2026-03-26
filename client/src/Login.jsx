@@ -42,7 +42,6 @@ function Login() {
         return;
       }
 
-      // Check content-type before parsing JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         console.error("❌ Server returned non-JSON response:", contentType);
@@ -58,7 +57,7 @@ function Login() {
       console.log("✅ API Response:", result);
 
       if (response.ok) {
-        // Check if it's admin or user
+
         if (result.role === "admin") {
           localStorage.setItem("adminAuth", result.token);
           localStorage.setItem("adminData", JSON.stringify(result.admin));
@@ -145,3 +144,4 @@ function Login() {
 }
 
 export default Login;
+

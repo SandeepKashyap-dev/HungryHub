@@ -29,3 +29,4 @@ export const getPasswordStrength = (pw) => {
   if (/[^A-Za-z0-9]/.test(pw)) s++;
   return s; // 0-5
 };
+

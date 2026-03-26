@@ -105,8 +105,7 @@ const handleCancelOrder = async (orderId) => {
 const handleLogout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  
-  // Dispatch custom event to notify other components about logout
+
   window.dispatchEvent(new Event("userLogout"));
   
   Navigate("/login");
@@ -173,7 +172,7 @@ const handleUpdate = async () => {
             <Link to="/orders" className="block hover:text-yellow-200">📦 My Orders</Link>
           </li>
 
-          {/* 🔹 Logout Button */}
+          {}
           <li>
             <button onClick={handleLogout} className="hover:text-yellow-200">
               🚪 Logout

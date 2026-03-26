@@ -21,14 +21,12 @@ function Section_2() {
         const token = localStorage.getItem("token");
         const user = localStorage.getItem("user");
 
-        // Check if user is logged in
         if (!token || !user) {
             alert("Please login to place an order");
             Navigate("/login", { state: { redirectTo: "/cart" } });
             return;
         }
 
-        // User is logged in, add to cart and go to cart
         addtocart(foodItem);
         Navigate("/cart");
     };

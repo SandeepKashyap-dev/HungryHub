@@ -59,7 +59,6 @@ function Nav() {
       setUser(null);
     }
 
-    // Listen for storage changes (login/logout from other tabs or same tab)
     const handleStorageChange = (e) => {
       if (e.key === "user") {
         if (e.newValue) {
@@ -76,7 +75,6 @@ function Nav() {
       }
     };
 
-    // Listen for custom login event (same tab login)
     const handleUserLogin = () => {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
@@ -89,7 +87,6 @@ function Nav() {
       }
     };
 
-    // Listen for custom logout event
     const handleUserLogout = () => {
       setUser(null);
       setShowProfileSidebar(false);
@@ -106,7 +103,6 @@ function Nav() {
     };
   }, []);
 
-  // Fetch user orders
   useEffect(() => {
     if (user) {
       fetchUserOrders();
@@ -142,8 +138,7 @@ function Nav() {
     localStorage.removeItem("adminData");
     setUser(null);
     setShowProfileSidebar(false);
-    
-    // Dispatch custom event to notify other components about logout
+
     window.dispatchEvent(new Event("userLogout"));
     
     navigate("/login");
@@ -215,10 +210,10 @@ function Nav() {
         </div>
       </nav>
 
-      {/* Profile Sidebar */}
+      {}
       {user && (
         <>
-          {/* Overlay */}
+          {}
           {showProfileSidebar && (
             <div
               className="fixed inset-0 bg-black bg-opacity-50 z-40"
@@ -226,13 +221,13 @@ function Nav() {
             />
           )}
 
-          {/* Sidebar */}
+          {}
           <div
             className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform duration-300 z-50 ${
               showProfileSidebar ? "translate-x-0" : "translate-x-full"
             } overflow-y-auto`}
           >
-            {/* Sidebar Header */}
+            {}
             <div className="bg-orange-500 text-white p-6">
               <button
                 onClick={() => setShowProfileSidebar(false)}
@@ -243,7 +238,7 @@ function Nav() {
               <h2 className="text-2xl font-bold clear-both">Profile</h2>
             </div>
 
-            {/* User Details */}
+            {}
             <div className="p-6 space-y-4">
               <div className="bg-gray-100 p-4 rounded-lg text-center">
                 <div className="w-16 h-16 bg-orange-500 text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-3">

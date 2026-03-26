@@ -11,7 +11,7 @@ function CheckoutPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check if user is authenticated
+
     if (token && user) {
       setIsAuthenticated(true);
     } else {
@@ -78,7 +78,6 @@ function CheckoutPage() {
     }
   };
 
-  // Don't render if not authenticated
   if (!isAuthenticated) {
     return null;
   }
@@ -102,7 +101,7 @@ function CheckoutPage() {
       <h2 className="text-2xl font-bold mb-6">Checkout</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Delivery Form */}
+        {}
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-bold mb-4">Delivery Information</h3>
@@ -239,7 +238,7 @@ function CheckoutPage() {
           </form>
         </div>
 
-        {/* Order Summary */}
+        {}
         <div className="bg-gray-100 p-6 rounded-lg shadow-md h-fit">
           <h3 className="text-xl font-bold mb-4">Order Summary</h3>
 
@@ -282,3 +281,4 @@ function CheckoutPage() {
 }
 
 export default CheckoutPage;
+
