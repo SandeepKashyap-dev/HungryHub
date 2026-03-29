@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { IoSearchSharp } from "react-icons/io5";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaBars, FaTimes } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "./config/api";
@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from "./config/api";
 function Nav() {
   const [foods, setfoods] = useState([]);
   const [search, searchupdate] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [showProfileSidebar, setShowProfileSidebar] = useState(false);
   const [orders, setOrders] = useState([]);
@@ -138,6 +139,7 @@ function Nav() {
     localStorage.removeItem("adminData");
     setUser(null);
     setShowProfileSidebar(false);
+    setMobileMenuOpen(false);
 
     window.dispatchEvent(new Event("userLogout"));
     
@@ -176,6 +178,16 @@ function Nav() {
               <h3 className="text-xl font-bold text-orange-500"> <Link to="/">HungryHub</Link> </h3>
             </span>
           </div>
+
+          {/* mobile burger */}
+          <button
+            className="md:hidden text-2xl text-orange-600 hover:text-orange-800"
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+
           <div className="hidden md:flex items-center ">
             <span className="font-bold">Deliverd to:</span>
             <FaLocationDot className="text-orange-500 m-2 " />
@@ -183,30 +195,44 @@ function Nav() {
             <span className="font-bold md:inline">Thanesar Old Bus Stand, Kurukshetra</span>
           </div>
 
-          <form className="relative flex " onSubmit={hendleSearch}>
-            <div className="relative  w-full flex items-center
-              border-gray-300
-             rounded px-3 py-2
-             focus-within:ring-2
-             focus-within:ring-orange-400">
-              <IoSearchSharp className="mr-2 text-orange-500 font-bold" />
+          <div className="hidden md:flex items-center flex-1 gap-4">
+            <form className="relative w-full" onSubmit={hendleSearch}>
+              <div className="relative w-full flex items-center border-gray-300 rounded px-3 py-2 focus-within:ring-2 focus-within:ring-orange-400">
+                <IoSearchSharp className="mr-2 text-orange-500 font-bold" />
+                <input
+                  type="text"
+                  value={search}
+                  placeholder="Search Food"
+                  onChange={(e) => searchupdate(e.target.value)}
+                  className="w-full outline-none"
+                />
+                {search && (
+                  <div className="absolute left-0 right-0 top-full mt-2 bg-white text-center rounded z-50">
+                    {uniqueFoods.length > 0 ? (
+                      uniqueFoods.map((food) => (
+                        <p
+                          key={food._id}
+                          className="p-2 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            const element = document.getElementById(food._id);
+                            if (element) {
+                              element.scrollIntoView({ behavior: "smooth" });
+                            }
+                            searchupdate("");
+                          }}
+                        >
+                          {food.name}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="p-2 text-gray-500 inline-block">No food found</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </form>
 
-              <input
-                type="text"
-                value={search}
-                placeholder="Search Food"
-                onChange={(e) => searchupdate(e.target.value)}
-                className="outline-none "
-
-
-
-
-              />
-              {search && (<div className="absolute left-0 right-0 top-full mt-2 bg-white text-center rounded z-50 "> {uniqueFoods.length > 0 ? (uniqueFoods.map((food) => (<p key={food._id} className="p-2 cursor-pointer hover:bg-gray-100" onClick={() => {const element=document.getElementById(food._id);if(element){element.scrollIntoView({behavior:"smooth"});}searchupdate("");}} > {food.name} </p>))) : (<p className="p-2 text-gray-500 inline-block">No food found</p>)} </div>)}
-
-            </div>
-          </form>
-          <Link
+            <Link
               to={user && user.fullname !== "Admin" ? "#" : "/register"}
               onClick={(e) => {
                 if (user && user.fullname !== "Admin") {
@@ -214,12 +240,88 @@ function Nav() {
                   setShowProfileSidebar(!showProfileSidebar);
                 }
               }}
-              className="flex items-center gap-2 text-orange-500 px-2 py-2 ml-4 rounded font-bold cursor-pointer hover:text-orange-600"
+              className="flex items-center gap-2 text-orange-500 px-2 py-2 rounded font-bold cursor-pointer hover:text-orange-600"
             >
               <FaUser />
               {user && user.fullname !== "Admin" ? user.fullname : "Reg_User"}
             </Link>
+          </div>
         </div>
+
+        {/* mobile menu panel */}
+        <div className={`md:hidden ${mobileMenuOpen ? "block" : "hidden"} bg-white px-4 pb-4 border-t border-gray-200`}>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <FaLocationDot className="text-orange-500" />
+              <div>
+                <div className="font-semibold">Deliverd to:</div>
+                <div className="text-xs text-gray-500">Thanesar Old Bus Stand, Kurukshetra</div>
+              </div>
+            </div>
+
+            <form className="relative" onSubmit={hendleSearch}>
+              <div className="relative flex items-center border border-gray-300 rounded px-3 py-2">
+                <IoSearchSharp className="mr-2 text-orange-500" />
+                <input
+                  type="text"
+                  value={search}
+                  placeholder="Search Food"
+                  onChange={(e) => searchupdate(e.target.value)}
+                  className="w-full outline-none text-sm"
+                />
+              </div>
+
+              {search && (
+                <div className="absolute left-0 right-0 top-full z-50 mt-1 bg-white rounded border border-gray-200 shadow-sm">
+                  {uniqueFoods.length > 0 ? (
+                    uniqueFoods.map((food) => (
+                      <p
+                        key={food._id}
+                        className="p-2 text-sm cursor-pointer hover:bg-gray-100"
+                        onClick={() => {
+                          const element = document.getElementById(food._id);
+                          if (element) {
+                            element.scrollIntoView({ behavior: "smooth" });
+                          }
+                          searchupdate("");
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        {food.name}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="p-2 text-gray-500 text-sm">No food found</p>
+                  )}
+                </div>
+              )}
+            </form>
+
+            <button
+              onClick={() => {
+                if (user) {
+                  setShowProfileSidebar((prev) => !prev);
+                } else {
+                  setMobileMenuOpen(false);
+                  navigate("/register");
+                }
+              }}
+              className="w-full bg-orange-500 text-white py-2 rounded font-semibold"
+            >
+              {user ? "Profile" : "Register / Login"}
+            </button>
+
+            {user && user.fullname !== "Admin" && (
+              <button
+                onClick={handleLogout}
+                className="w-full bg-red-500 text-white py-2 rounded font-semibold"
+              >
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
+
       </nav>
 
       {}
