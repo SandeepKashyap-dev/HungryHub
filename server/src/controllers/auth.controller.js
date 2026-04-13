@@ -4,6 +4,7 @@ const adminmodule = require("../models/adminmodule");
 const ordermodule = require("../models/ordermodule");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { uploadOnCloudinary } = require("../utils/cloudinary");
 
 async function registerUser(req, res) {
   try {
@@ -71,12 +72,12 @@ async function userlogin(req, res) {
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }   // user 7 din tak login rahega
+      { expiresIn: "365d" }   // user 365 din tak login rahega
     );
 
     res.cookie("token", token, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000,   // 7 days
+      maxAge: 365 * 24 * 60 * 60 * 1000,   // 365 days
       sameSite: "lax"
     });
 
@@ -120,7 +121,7 @@ async function userprofile(req, res) {
 async function updateprofile(req, res) {
   try {
     const userid = req.user.id;
-    const { fullname, email } = req.body;
+    const { fullname, email, phone, address, city, postalCode } = req.body;
 
     if (!fullname || !email) {
       return res.status(400).json({ message: "Fullname and email are required" });
@@ -128,7 +129,7 @@ async function updateprofile(req, res) {
 
     const user = await usermodel.findByIdAndUpdate(
       userid,
-      { fullname, email },
+      { fullname, email, phone, address, city, postalCode },
       { new: true }
     ).select("-password");
 
@@ -161,7 +162,24 @@ async function foodcard(req, res) {
 
 async function addfood(req, res) {
   try {
-    const food = await foodmodule.create(req.body);
+    const { name, price, category, isPopular } = req.body;
+    let imageUrl = "";
+
+    if (req.file) {
+      const result = await uploadOnCloudinary(req.file.path);
+      if (result) {
+        imageUrl = result.secure_url;
+      }
+    }
+
+    const food = await foodmodule.create({
+      name,
+      price: Number(price),
+      category,
+      isPopular: isPopular === "true" || isPopular === true,
+      image: imageUrl,
+    });
+
     return res.status(201).json({
       message: "food saved successfully",
       food,
@@ -191,7 +209,21 @@ async function allfood(req, res) {
 async function updatefood(req, res) {
   try {
     const foodId = req.params.id;
-    const updated = await foodmodule.findByIdAndUpdate(foodId, req.body, { new: true });
+    const bodyData = { ...req.body };
+
+    if (req.file) {
+      const result = await uploadOnCloudinary(req.file.path);
+      if (result) {
+        bodyData.image = result.secure_url;
+      }
+    }
+
+    if (bodyData.price) bodyData.price = Number(bodyData.price);
+    if (bodyData.isPopular !== undefined) {
+      bodyData.isPopular = bodyData.isPopular === "true" || bodyData.isPopular === true;
+    }
+
+    const updated = await foodmodule.findByIdAndUpdate(foodId, bodyData, { new: true });
     if (!updated) {
       return res.status(404).json({ message: "Food item not found" });
     }
@@ -435,12 +467,12 @@ async function unifiedLogin(req, res) {
         const token = jwt.sign(
           { id: admin._id },
           process.env.JWT_SECRET,
-          { expiresIn: "7d" }
+          { expiresIn: "365d" }
         );
 
         res.cookie("adminAuth", token, {
           httpOnly: true,
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 365 * 24 * 60 * 60 * 1000,
           sameSite: "lax"
         });
 
@@ -475,12 +507,12 @@ async function unifiedLogin(req, res) {
         const token = jwt.sign(
           { id: user._id },
           process.env.JWT_SECRET,
-          { expiresIn: "7d" }
+          { expiresIn: "365d" }
         );
 
         res.cookie("token", token, {
           httpOnly: true,
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: 365 * 24 * 60 * 60 * 1000,
           sameSite: "lax"
         });
 
@@ -511,6 +543,41 @@ async function unifiedLogin(req, res) {
   }
 }
 
+async function rateFoodItem(req, res) {
+  try {
+    const { rating } = req.body;
+    const foodId = req.params.id;
+    const userId = req.user.id;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Invalid rating value" });
+    }
+
+    const food = await foodmodule.findById(foodId);
+    if (!food) {
+      return res.status(404).json({ message: "Food item not found" });
+    }
+
+    const existingReview = food.reviews.find(r => r.userId.toString() === userId.toString());
+
+    if (existingReview) {
+      existingReview.rating = Number(rating);
+    } else {
+      food.reviews.push({ userId, rating: Number(rating) });
+      food.numReviews = food.reviews.length;
+    }
+
+    food.rating = food.reviews.reduce((acc, item) => item.rating + acc, 0) / food.reviews.length;
+
+    await food.save();
+
+    return res.status(200).json({ message: "Rating updated successfully", food });
+  } catch (error) {
+    console.error("rateFoodItem error", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+}
+
 module.exports = {
   registerUser,
   userlogin,
@@ -529,5 +596,5 @@ module.exports = {
   deletefood,
   getAllUsers,
   deleteUser,
+  rateFoodItem,
 };
-

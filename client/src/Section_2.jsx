@@ -2,12 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { API_ENDPOINTS } from "./config/api";
 import { CreateContext } from "./CartContext";
 import { useNavigate } from "react-router-dom";
+import Toast from "./Toast";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 function Section_2() {
   const [food, setFood] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [categories, setCategories] = useState([]);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
   const { addtocart } = useContext(CreateContext);
   const navigate = useNavigate();
 
@@ -30,6 +34,55 @@ function Section_2() {
     fetchFood();
   }, []);
 
+  const handleRateFood = async (foodId, ratingValue) => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (!token || !user) {
+      alert("Please login to rate this food item");
+      navigate("/login", { state: { redirectTo: "/" } });
+      return;
+    }
+
+    try {
+      const res = await fetch(API_ENDPOINTS.RATE_FOOD(foodId), {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ rating: ratingValue })
+      });
+
+      if (res.ok) {
+        setToastMessage("Thanks for your rating! ⭐");
+        setShowToast(true);
+        fetchFood();
+      } else {
+        const errorData = await res.json();
+        alert(errorData.message || "Failed to submit rating");
+      }
+    } catch (error) {
+      console.error("Error rating food", error);
+      alert("An error occurred");
+    }
+  };
+
+  const handleAddToCart = (foodItem) => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (!token || !user) {
+      alert("Please login to add items to cart");
+      navigate("/login", { state: { redirectTo: "/" } });
+      return;
+    }
+
+    addtocart(foodItem);
+    setToastMessage(`${foodItem.name} added to cart!`);
+    setShowToast(true);
+  };
+
   const handleOrderNow = (foodItem) => {
     const token = localStorage.getItem("token");
     const user = localStorage.getItem("user");
@@ -45,9 +98,12 @@ function Section_2() {
   };
 
   const filteredFood = food.filter((item) => {
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
-      (item.category || "").toLowerCase().includes(search.toLowerCase());
+    if (!item) return false;
+    const name = item.name || "";
+    const category = item.category || "";
+    const matchesCategory = selectedCategory === "All" || category === selectedCategory;
+    const matchesSearch = name.toLowerCase().includes(search.toLowerCase()) ||
+      category.toLowerCase().includes(search.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -96,12 +152,30 @@ function Section_2() {
                   <img src={item.image} alt={item.name} className="w-full h-40 object-cover rounded-t-2xl" />
                   <div className="p-4">
                     <h4 className="text-lg font-semibold">{item.name}</h4>
-                    <p className="text-sm text-orange-500 font-medium">🍴 {item.restaurant}</p>
-                    <p className="inline-block bg-gray-200 text-xs px-2 py-1 rounded-full mt-2">{item.category || "Unknown"}</p>
+                    <div className="flex items-center gap-1 mt-1 mb-2">
+                       {[1, 2, 3, 4, 5].map((star) => (
+                          <span 
+                             key={star} 
+                             className="cursor-pointer text-yellow-500 text-lg hover:scale-125 transition-transform"
+                             onClick={() => handleRateFood(item._id, star)}
+                             title={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                          >
+                             {star <= Math.round(item.rating || 0) ? <FaStar /> : <FaRegStar />}
+                          </span>
+                       ))}
+                       <span className="text-xs text-gray-500 ml-1 font-medium">({item.numReviews || 0} reviews)</span>
+                    </div>
+                    <p className="inline-block bg-orange-100 text-orange-600 font-bold text-xs px-2 py-1 rounded-full">{item.category || "Unknown"}</p>
                     <p className="mt-2">₹ {item.price}</p>
                     <button
+                      onClick={() => handleAddToCart(item)}
+                      className="mt-4 w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-medium transition"
+                    >
+                      Add to Cart
+                    </button>
+                    <button
                       onClick={() => handleOrderNow(item)}
-                      className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl font-medium transition"
+                      className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-xl font-medium transition"
                     >
                       Order Now
                     </button>
@@ -111,6 +185,9 @@ function Section_2() {
             </div>
           </div>
         ))
+      )}
+      {showToast && (
+        <Toast message={toastMessage} onClose={() => setShowToast(false)} />
       )}
     </section>
   );

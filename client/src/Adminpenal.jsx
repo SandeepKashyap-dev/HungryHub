@@ -6,7 +6,6 @@ function Adminpenal() {
     name: "",
     image: "",
     price: "",
-    restaurant: "",
     category: "",
     isPopular: true,
   };
@@ -16,6 +15,8 @@ function Adminpenal() {
   const [users, setUsers] = useState([]);
   const [editFoodId, setEditFoodId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [preview, setPreview] = useState("");
   const [message, setMessage] = useState("");
 
   const fetchFoods = async () => {
@@ -44,32 +45,41 @@ function Adminpenal() {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFood((prev) => ({ ...prev, [name]: value }));
+    const { name, value, files } = e.target;
+    if (name === "image" && files && files[0]) {
+      const file = files[0];
+      setImageFile(file);
+      setPreview(URL.createObjectURL(file));
+    } else {
+      setFood((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const payload = {
-        ...food,
-        price: Number(food.price),
-        isPopular: food.isPopular === "true" || food.isPopular === true,
-      };
+      const formData = new FormData();
+      formData.append("name", food.name);
+      formData.append("price", food.price);
+      formData.append("category", food.category);
+      formData.append("isPopular", food.isPopular);
+      if (imageFile) {
+        formData.append("image", imageFile);
+      } else {
+        formData.append("image", food.image); // Keep old URL if no new file selected
+      }
 
       let res;
       if (editFoodId) {
         res = await fetch(API_ENDPOINTS.UPDATE_FOOD(editFoodId), {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: formData,
         });
       } else {
         res = await fetch(API_ENDPOINTS.ADD_FOOD, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: formData,
         });
       }
 
@@ -81,6 +91,8 @@ function Adminpenal() {
       const responseData = await res.json();
       setMessage(editFoodId ? "Food updated successfully" : "Food added successfully");
       setFood(emptyFood);
+      setImageFile(null);
+      setPreview("");
       setEditFoodId(null);
       fetchFoods();
     } catch (error) {
@@ -96,10 +108,11 @@ function Adminpenal() {
       name: item.name || "",
       image: item.image || "",
       price: item.price || "",
-      restaurant: item.restaurant || "",
       category: item.category || "",
       isPopular: item.isPopular ?? true,
     });
+    setPreview(item.image || "");
+    setImageFile(null);
     setEditFoodId(item._id);
   };
 
@@ -162,10 +175,20 @@ function Adminpenal() {
           <section className="bg-white p-6 rounded-xl shadow-sm">
             <h2 className="text-xl font-semibold mb-4">{editFoodId ? "Update Food" : "Add Food"}</h2>
             <form className="space-y-3" onSubmit={handleSubmit}>
-              <input name="name" value={food.name} onChange={handleChange} placeholder="Food Name" className="w-full p-2 border rounded" />
-              <input name="image" value={food.image} onChange={handleChange} placeholder="Image URL" className="w-full p-2 border rounded" />
-              <input name="price" value={food.price} onChange={handleChange} type="number" placeholder="Price" className="w-full p-2 border rounded" />
-              <input name="restaurant" value={food.restaurant} onChange={handleChange} placeholder="Restaurant" className="w-full p-2 border rounded" />
+              <input name="name" value={food.name} onChange={handleChange} placeholder="Food Name" className="w-full p-2 border rounded" required />
+              
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-700">Food Image</label>
+                <input type="file" name="image" onChange={handleChange} className="w-full p-2 border rounded" accept="image/*" />
+                {preview && (
+                  <div className="mt-2">
+                    <img src={preview} alt="Preview" className="h-20 w-20 object-cover rounded-lg border" />
+                  </div>
+                )}
+              </div>
+
+              <input name="price" value={food.price} onChange={handleChange} type="number" placeholder="Price" className="w-full p-2 border rounded" required />
+
               <input name="category" value={food.category} onChange={handleChange} placeholder="Category" className="w-full p-2 border rounded" />
               <div className="flex gap-2">
                 <button type="submit" disabled={isLoading} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg">
@@ -214,7 +237,6 @@ function Adminpenal() {
               <tr>
                 <th className="p-2">Name</th>
                 <th className="p-2">Price</th>
-                <th className="p-2">Restaurant</th>
                 <th className="p-2">Category</th>
                 <th className="p-2">Actions</th>
               </tr>
@@ -224,7 +246,6 @@ function Adminpenal() {
                 <tr key={item._id} className="border-b hover:bg-gray-50">
                   <td className="p-2">{item.name}</td>
                   <td className="p-2">₹{item.price}</td>
-                  <td className="p-2">{item.restaurant}</td>
                   <td className="p-2">{item.category}</td>
                   <td className="p-2 flex gap-2">
                     <button onClick={() => startEditFood(item)} className="px-2 py-1 text-white bg-blue-500 rounded hover:bg-blue-600">

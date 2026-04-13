@@ -28,6 +28,11 @@ const orderSchema = new mongoose.Schema({
         enum: ["cod", "card", "upi"],
         default: "cod"
     },
+    orderType: {
+        type: String,
+        enum: ["Delivery", "Pickup"],
+        default: "Delivery"
+    },
     total: Number,
     status: {
         type: String,

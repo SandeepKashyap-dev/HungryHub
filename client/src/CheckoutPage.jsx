@@ -9,6 +9,7 @@ function CheckoutPage() {
   const token = localStorage.getItem("token");
   const user = localStorage.getItem("user");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [orderType, setOrderType] = useState(localStorage.getItem("orderType") || "Delivery");
 
   useEffect(() => {
 
@@ -31,6 +32,45 @@ function CheckoutPage() {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+
+  // Load user profile data to pre-fill form
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (token) {
+        try {
+          const response = await fetch(API_ENDPOINTS.USER_PROFILE, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const user = data.user;
+
+            // Pre-fill form with profile data
+            setFormData(prevData => ({
+              ...prevData,
+              fullName: user.fullname || prevData.fullName,
+              email: user.email || prevData.email,
+              phone: user.phone || prevData.phone,
+              address: user.address || prevData.address,
+              city: user.city || prevData.city,
+              postalCode: user.postalCode || prevData.postalCode,
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to load user profile:", error);
+        }
+      }
+    };
+
+    if (isAuthenticated) {
+      loadUserProfile();
+    }
+  }, [isAuthenticated, token]);
 
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -57,14 +97,59 @@ function CheckoutPage() {
         },
         body: JSON.stringify({
           items: cart,
-          deliveryInfo: formData,
+          deliveryInfo: orderType === "Pickup" ? {
+            fullName: formData.fullName,
+            email: formData.email,
+            phone: formData.phone,
+            address: "Pickup from Store",
+            city: "N/A",
+            postalCode: "000000"
+          } : formData,
           paymentMethod: formData.paymentMethod,
+          orderType: orderType,
           total: total,
         }),
       });
 
       const responseData = await response.json();
       if (response.ok) {
+        // Update user profile with delivery information (only for delivery orders)
+        if (orderType === "Delivery") {
+          try {
+            await fetch(API_ENDPOINTS.USER_UPDATE_PROFILE, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+              body: JSON.stringify({
+                fullname: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                postalCode: formData.postalCode,
+              }),
+            });
+
+            // Update localStorage with new profile data
+            const storedUser = JSON.parse(localStorage.getItem("user"));
+            const updatedUser = {
+              ...storedUser,
+              fullname: formData.fullName,
+              email: formData.email,
+              phone: formData.phone,
+              address: formData.address,
+              city: formData.city,
+              postalCode: formData.postalCode,
+            };
+            localStorage.setItem("user", JSON.stringify(updatedUser));
+
+          } catch (profileError) {
+            console.error("Failed to update profile:", profileError);
+          }
+        }
+
         alert("Order placed successfully!");
         clearCart();
         navigate("/order-confirmation");
@@ -142,42 +227,52 @@ function CheckoutPage() {
               />
             </div>
 
-            <div className="mb-4">
-              <label className="block font-semibold mb-2">Address</label>
-              <textarea
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                required
-                rows="3"
-                className="w-full border border-gray-300 rounded px-4 py-2"
-              />
-            </div>
+            {orderType === "Delivery" ? (
+              <>
+                <div className="mb-4">
+                  <label className="block font-semibold mb-2">Address</label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    required
+                    rows="3"
+                    className="w-full border border-gray-300 rounded px-4 py-2"
+                  />
+                </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block font-semibold mb-2">City</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full border border-gray-300 rounded px-4 py-2"
-                />
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block font-semibold mb-2">City</label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-4 py-2"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold mb-2">Postal Code</label>
+                    <input
+                      type="text"
+                      name="postalCode"
+                      value={formData.postalCode}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full border border-gray-300 rounded px-4 py-2"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="bg-orange-50 p-4 rounded-lg mb-6 border border-orange-200">
+                <p className="text-orange-700 font-medium flex items-center gap-2">
+                   <span className="text-xl">🏪</span> You have selected **Pickup**. Please collect your fresh order from our main kitchen.
+                </p>
               </div>
-              <div>
-                <label className="block font-semibold mb-2">Postal Code</label>
-                <input
-                  type="text"
-                  name="postalCode"
-                  value={formData.postalCode}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full border border-gray-300 rounded px-4 py-2"
-                />
-              </div>
-            </div>
+            )}
 
             <h3 className="text-xl font-bold mb-4">Payment Method</h3>
 

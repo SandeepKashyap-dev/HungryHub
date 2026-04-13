@@ -20,7 +20,13 @@ function AdminLayout() {
         <p><Link to="/admin/users">Manage Users</Link></p>
         <p><Link to="/admin/orders">Orders</Link></p>
         <p><Link to="/admin/addfood">Add Food</Link></p>
-        <p><Link to="/login">Logout</Link></p>
+        <p><Link to="/" onClick={() => {
+          localStorage.removeItem("adminAuth");
+          localStorage.removeItem("adminData");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.dispatchEvent(new Event("userLogout"));
+        }}>Logout</Link></p>
 
       </div>
 

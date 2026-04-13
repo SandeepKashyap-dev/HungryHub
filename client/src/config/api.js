@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   UPDATE_FOOD: (id) => `${API_URL}/api/food/${id}`,
   DELETE_FOOD: (id) => `${API_URL}/api/food/${id}`,
   GET_FOOD_CARD: `${API_URL}/api/food/foodcard`,
+  RATE_FOOD: (id) => `${API_URL}/api/food/${id}/rate`,
 
   GET_ALL_USERS: `${API_URL}/api/admin/users`,
   DELETE_USER: (id) => `${API_URL}/api/admin/users/${id}`,
