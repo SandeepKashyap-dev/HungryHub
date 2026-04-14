@@ -10,6 +10,7 @@ function CheckoutPage() {
   const user = localStorage.getItem("user");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [orderType, setOrderType] = useState(localStorage.getItem("orderType") || "Delivery");
+  const [manualDeliveryFee, setManualDeliveryFee] = useState(orderType === "Delivery" ? 40 : 0);
 
   useEffect(() => {
 
@@ -72,10 +73,13 @@ function CheckoutPage() {
     }
   }, [isAuthenticated, token]);
 
-  const total = cart.reduce(
+  // Calculate subtotal
+  const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  const finalTotal = subtotal + Number(manualDeliveryFee || 0);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -107,7 +111,7 @@ function CheckoutPage() {
           } : formData,
           paymentMethod: formData.paymentMethod,
           orderType: orderType,
-          total: total,
+          total: finalTotal,
         }),
       });
 
@@ -349,17 +353,26 @@ function CheckoutPage() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex justify-between font-semibold">
+            <div className="flex justify-between font-semibold text-gray-700">
               <span>Subtotal:</span>
-              <span>₹ {total}</span>
+              <span>₹ {subtotal}</span>
             </div>
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between items-center text-sm text-orange-600 font-medium">
               <span>Delivery Fee:</span>
-              <span>₹ 0</span>
+              <div className="flex items-center gap-1">
+                <span>₹</span>
+                <input
+                  type="number"
+                  value={manualDeliveryFee}
+                  onChange={(e) => setManualDeliveryFee(e.target.value)}
+                  className="w-16 px-1 py-0.5 border border-orange-300 rounded text-center focus:ring-1 focus:ring-orange-400 outline-none"
+                  min="0"
+                />
+              </div>
             </div>
-            <div className="flex justify-between text-lg font-bold border-t pt-4 mt-4">
+            <div className="flex justify-between text-xl font-bold border-t border-gray-300 pt-4 mt-4 text-green-700">
               <span>Total:</span>
-              <span>₹ {total}</span>
+              <span>₹ {finalTotal}</span>
             </div>
           </div>
 
